@@ -1,14 +1,33 @@
-import React from "react";
-import { Button, View, Text } from "react-native";
+import React, { useEffect, useState } from "react";
+import useAuth from "../../Hooks/useAuth";
+import Loading from "../../Components/Loading/Loading";
 
-export default function Home({ navigation }) {
-  return (
-    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-      <Text>Home Screen</Text>
-      {/* <Button 
-      title="Go to About Screen" 
-      onPress={() => { navigation.navigate('About') }}
-      /> */}
-    </View>
-  );
+import { FIREBASE_FIRESTORE } from "../../Config/FireBaseConfig";
+import { doc, getDoc } from "firebase/firestore";
+
+import Client from "../Client/Client";
+import Admin from "../Admin/Admin";
+
+export default function Home() {
+  const { userID } = useAuth();
+  const [User, setUser] = useState(null);
+
+  useEffect(() => {
+    const getData = async () => {
+      if (userID) {
+        const DocRef = doc(FIREBASE_FIRESTORE, "users", userID);
+        const docSnap = await getDoc(DocRef);
+        setUser({ id: userID, ...docSnap.data() });
+        // console.log({ id: userID, ...docSnap.data() });
+      }
+    };
+    getData();
+
+  }, [userID]);
+
+  if (!User) return <Loading />;
+
+  if (User.Type === "Admin") return <Admin User={User} />;
+
+  return <Client User={User} />;
 }

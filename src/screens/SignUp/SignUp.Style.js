@@ -1,12 +1,15 @@
 import { StyleSheet } from "react-native";
 
-export const Styles = StyleSheet.create({
+export const Style = StyleSheet.create({
   container: {
     flex: 1,
-    display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    flexDirection: "column",
+    backgroundColor: 'white'
+  },
+  Title: {
+    fontSize: 30,
+    fontWeight: "600",
   },
   TextInput: {
     marginTop: 10,
@@ -15,5 +18,11 @@ export const Styles = StyleSheet.create({
     // margin: 12,
     borderWidth: 1,
     padding: 10,
+  },
+  Error: {
+    color: "red"
+  },
+  SignIn: {
+    textDecorationLine: "underline",
   },
 });
