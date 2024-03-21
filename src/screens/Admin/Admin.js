@@ -9,6 +9,8 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 
 import { useNavigation } from "@react-navigation/native";
 
+import LocalStorage from "../../utils/LocalStorage";
+
 const Admin = (props) => {
   const { User } = props;
   const [data, setData] = useState([]);
@@ -38,7 +40,13 @@ const Admin = (props) => {
     <View style={Style.container}>
       <View style={Style.AppBar}>
         <Text style={Style.AppBarText}>Hello, {`${User.Name}`} 👋</Text>
-        <Button title="Logout" onPress={() => FIREBASE_AUTH.signOut()} />
+        <Button
+          title="Logout"
+          onPress={() => {
+            LocalStorage.ClearLocalStorage()
+            FIREBASE_AUTH.signOut();
+          }}
+        />
       </View>
       <Text style={Style.Passions}>Les Passions</Text>
       <View style={Style.Cards}>
@@ -49,7 +57,7 @@ const Admin = (props) => {
               User={item}
               onPress={() => {
                 navigation.navigate("ClientDetails", {
-                  User: item
+                  User: item,
                 });
               }}
             />

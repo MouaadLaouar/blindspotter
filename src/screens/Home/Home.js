@@ -8,6 +8,8 @@ import { doc, getDoc } from "firebase/firestore";
 import Client from "../Client/Client";
 import Admin from "../Admin/Admin";
 
+import LocalStorage from "../../utils/LocalStorage";
+
 export default function Home() {
   const { userID } = useAuth();
   const [User, setUser] = useState(null);
@@ -19,6 +21,8 @@ export default function Home() {
         const docSnap = await getDoc(DocRef);
         setUser({ id: userID, ...docSnap.data() });
         // console.log({ id: userID, ...docSnap.data() });
+
+        LocalStorage.storeData("UserID", userID)
       }
     };
     getData();
