@@ -15,26 +15,27 @@ const Admin = (props) => {
   const { User } = props;
   const [data, setData] = useState([]);
 
-  const navigation = useNavigation();
+  const navigation = useNavigation(); // Initialisation du hook de navigation
 
-  useEffect(() => {
-    const getData = async () => {
-      const data = [];
-      const q = query(
+  useEffect(() => { // Utilisation du hook useEffect pour charger les données une seule fois au montage du composant
+    const getData = async () => { // Définition de la fonction asynchrone pour récupérer les données des utilisateurs
+      const data = []; // Initialisation d'un tableau pour stocker les données récupérées
+      const q = query( // Création d'une requête Firestore pour récupérer les utilisateurs de type "Patient"
         collection(FIREBASE_FIRESTORE, "users"),
         where("Type", "==", "Patient")
       );
 
-      const querySnapshot = await getDocs(q);
-      querySnapshot.forEach((doc) => {
-        data.push({ id: doc.id, ...doc.data() });
+      const querySnapshot = await getDocs(q); // Exécution de la requête Firestore
+      querySnapshot.forEach((doc) => { // Parcours des résultats de la requête
+        data.push({ id: doc.id, ...doc.data() }); // Ajout des données de chaque utilisateur au tableau
       });
 
-      setData(data);
+      setData(data); // Mise à jour de l'état local avec les données récupérées
     };
 
-    getData();
+    getData(); // Appel de la fonction pour récupérer les données au montage du composant
   }, []);
+
 
   return (
     <View style={Style.container}>
@@ -43,8 +44,8 @@ const Admin = (props) => {
         <Button
           title="Logout"
           onPress={() => {
-            LocalStorage.ClearLocalStorage()
-            FIREBASE_AUTH.signOut();
+            LocalStorage.ClearLocalStorage() // Effacement des données de stockage local
+            FIREBASE_AUTH.signOut(); // Déconnexion de l'utilisateur
           }}
         />
       </View>

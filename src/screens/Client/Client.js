@@ -12,37 +12,44 @@ import * as TaskManager from "expo-task-manager";
 import { doc, updateDoc } from "firebase/firestore";
 import LocalStorage from "../../utils/LocalStorage";
 
-const LOCATION_TASK_NAME = "background-location-task";
+const LOCATION_TASK_NAME = "background-location-task"; // Nom de la tâche de localisation en arrière-plan
 
 const requestPermissions = async () => {
+  // Fonction asynchrone pour demander les autorisations de localisation
   const { status: foregroundStatus } =
-    await Location.requestForegroundPermissionsAsync();
+    await Location.requestForegroundPermissionsAsync(); // Demande d'autorisations de localisation en premier plan
   if (foregroundStatus === "granted") {
+    // Vérification si les autorisations en premier plan ont été accordées
     const { status: backgroundStatus } =
-      await Location.requestBackgroundPermissionsAsync();
+      await Location.requestBackgroundPermissionsAsync(); // Demande d'autorisations de localisation en arrière-plan
     if (backgroundStatus === "granted") {
+      // Vérification si les autorisations en arrière-plan ont été accordées
       await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
-        accuracy: Location.Accuracy.Balanced,
+        // Démarrage des mises à jour de localisation en arrière-plan
+        accuracy: Location.Accuracy.Balanced, // Précision de la localisation
       });
     }
   }
 };
 
 TaskManager.defineTask(LOCATION_TASK_NAME, async () => {
-  const now = Date.now();
+  // Définition de la tâche de localisation en arrière-plan
+  const now = Date.now(); // Obtention de l'heure actuelle
 
   console.log(
     `Got background fetch call at date: ${new Date(now).toISOString()}`
-  );
+  ); // Journalisation de l'appel de récupération en arrière-plan
 
-  const UserId = await LocalStorage.getUserID();
-  console.log("UserId => ", UserId);
+  const UserId = await LocalStorage.getUserID(); // Obtention de l'identifiant de l'utilisateur depuis le stockage local
+  console.log("UserId => ", UserId); // Journalisation de l'identifiant de l'utilisateur
 
-  let location = await Location.getCurrentPositionAsync({});
+  let location = await Location.getCurrentPositionAsync({}); // Obtention de la localisation actuelle
 
   if (UserId) {
-    const UserRef = doc(FIREBASE_FIRESTORE, "users", UserId);
+    // Vérification de la présence de l'identifiant de l'utilisateur
+    const UserRef = doc(FIREBASE_FIRESTORE, "users", UserId); // Référence à l'utilisateur dans la base de données Firestore
     await updateDoc(UserRef, {
+      // Mise à jour des données de localisation de l'utilisateur
       Location: {
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
@@ -50,28 +57,32 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async () => {
     });
   }
 
-  return BackgroundFetch.BackgroundFetchResult.NewData;
+  return BackgroundFetch.BackgroundFetchResult.NewData; // Retour de l'état de la récupération en arrière-plan
 });
 
 BackgroundFetch.registerTaskAsync(LOCATION_TASK_NAME, {
-  minimumInterval: 60 * 1, // 15 minutes
-  stopOnTerminate: false, // android only,
-  startOnBoot: true, // android only
+  // Enregistrement de la tâche de localisation en arrière-plan
+  minimumInterval: 60 * 1, // Interval minimum entre chaque exécution de la tâche (1 minute)
+  stopOnTerminate: false, // Ne pas arrêter la tâche lorsque l'application est arrêtée (Android uniquement)
+  startOnBoot: true, // Démarrer la tâche lorsque l'appareil est démarré (Android uniquement)
 });
 
 const Client = (props) => {
-  const { User } = props;
-  const { coords, errorMsg } = usegetLocation();
+  const { User } = props; // Extraction de la propriété "User" passée en tant que prop
+  const { coords, errorMsg } = usegetLocation(); // Obtention des coordonnées de localisation et des messages d'erreur à l'aide du hook usegetLocation
 
   useEffect(() => {
+    // Utilisation du hook useEffect pour exécuter une action au montage du composant
     const sendLocation = async () => {
-      await requestPermissions();
+      // Définition de la fonction asynchrone pour envoyer la localisation à la base de données
+      await requestPermissions(); // Demande d'autorisations de localisation
 
-      const UserRef = doc(FIREBASE_FIRESTORE, "users", User.id);
+      const UserRef = doc(FIREBASE_FIRESTORE, "users", User.id); // Référence à l'utilisateur dans la base de données Firestore
 
-      let location = await Location.getCurrentPositionAsync({});
+      let location = await Location.getCurrentPositionAsync({}); // Obtention de la localisation actuelle
 
       await updateDoc(UserRef, {
+        // Mise à jour des données de localisation de l'utilisateur dans la base de données Firestore
         Location: {
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
@@ -79,7 +90,7 @@ const Client = (props) => {
       });
     };
 
-    sendLocation();
+    sendLocation(); // Appel de la fonction pour envoyer la localisation au montage du composant
   }, []);
 
   return (
